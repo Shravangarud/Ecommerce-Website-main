@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+// Only require mongodb-memory-server if NOT in production to prevent deployment crashes
+const { MongoMemoryServer } = process.env.NODE_ENV === 'production'
+  ? { MongoMemoryServer: null }
+  : require('mongodb-memory-server');
 
 /**
  * Connect to MongoDB Database
