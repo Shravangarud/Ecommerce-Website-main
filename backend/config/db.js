@@ -20,6 +20,13 @@ const connectDB = async () => {
     console.log(`MongoDB Connected (Real): ${conn.connection.host}`);
   } catch (error) {
     console.warn(`[WARNING] Failed to connect to Real MongoDB: ${error.message}`);
+
+    // In production, do not attempt fallback as it requires devDependencies
+    if (process.env.NODE_ENV === 'production') {
+      console.error('🔴 Fatal: MongoDB connection failed in production. Exiting.');
+      process.exit(1);
+    }
+
     console.log('[INFO] Attempting to start In-Memory MongoDB instead...');
 
     try {
