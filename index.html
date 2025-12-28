@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyShop — Demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header class="sp-header">
+    <div class="container topbar">
+      <div class="brand" onclick="navigateTo('home')" style="cursor:pointer">MyShop</div>
+      <nav class="main-nav">
+        <a href="#products" onclick="navigateTo('products')">Shop</a>
+        <a href="#orders" onclick="navigateTo('orders')">Orders</a>
+      </nav>
+      <div class="header-actions">
+        <div class="header-search" role="search">
+          <input id="sp-search" class="search-input" type="search" placeholder="Search products, e.g. shoes"
+            aria-label="Search products">
+          <button id="sp-search-btn" class="search-btn" aria-label="Search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+          </button>
+        </div>
+        <div class="nav-extra">
+          <div class="fancy-select" id="currency-dropdown">
+            <button class="fancy-select-trigger">
+              <span id="current-currency-text">INR (₹)</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            <div class="fancy-select-options">
+              <div class="fancy-option" data-value="INR">INR (₹)</div>
+              <div class="fancy-option" data-value="USD">USD ($)</div>
+              <div class="fancy-option" data-value="EUR">EUR (€)</div>
+              <div class="fancy-option" data-value="GBP">GBP (£)</div>
+            </div>
+          </div>
+        </div>
+        <div id="auth-links" class="auth-links">
+          <a href="#login" onclick="navigateTo('login')">Log in</a>
+          <a href="#signup" onclick="navigateTo('signup')" style="margin-left:10px">Sign up</a>
+        </div>
+        <button class="cart-btn" aria-label="View cart" onclick="navigateTo('cart')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true">
+            <path d="M6 6h15l-1.5 9h-12L4 2H2" stroke="#0b1220" stroke-width="1.2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          <span class="cart-count" id="sp-cart">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Home -->
+    <section data-section="home" id="home" style="display:none">
+      <h1>Welcome to MyShop</h1>
+      <p class="lead">Discover our curated collection of premium products across all categories.</p>
+      <div style="margin-top:20px">
+        <button class="add-btn" onclick="navigateTo('products')">Start Shopping</button>
+      </div>
+    </section>
+
+    <!-- Products -->
+    <section data-section="products" id="products">
+      <h1>Simple Products</h1>
+      <p class="lead">Filter by category and see product cards with pricing & discounts.</p>
+      <div class="sp-categories" aria-label="Categories">
+        <div id="sp-cats" class="cat-list"></div>
+      </div>
+      <div class="sp-products" aria-live="polite">
+        <div id="sp-grid" class="grid"></div>
+        <div id="sp-empty" class="empty" hidden>No products found.</div>
+      </div>
+    </section>
+
+    <!-- Product Detail -->
+    <section data-section="product-detail" id="product-detail" style="display:none">
+      <nav class="breadcrumb">
+        <a href="#products" onclick="navigateTo('products')">← Back to Products</a>
+      </nav>
+      <div id="pd-content" class="product-detail-layout">
+        <!-- Filled by style.js -->
+      </div>
+    </section>
+
+    <!-- Cart -->
+    <section data-section="cart" id="cart" style="display:none">
+      <h1>Your cart</h1>
+      <div id="cart-empty" class="empty" hidden>Your cart is empty.</div>
+      <div id="cart-items" class="cart-items"></div>
+      <div id="cart-summary" class="cart-summary" hidden>
+        <div class="summary-row">
+          <div>Subtotal</div>
+          <div id="cart-subtotal">$0.00</div>
+        </div>
+        <div class="summary-row">
+          <div>Tax (10%)</div>
+          <div id="cart-tax">$0.00</div>
+        </div>
+        <div class="summary-row total">
+          <div>Total</div>
+          <div id="cart-total">$0.00</div>
+        </div>
+        <div style="margin-top:12px">
+          <button id="checkout" class="add-btn" type="button" onclick="navigateTo('order')">Proceed to Checkout</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Order -->
+    <section data-section="order" id="order" style="display:none">
+      <h1>Checkout</h1>
+      <p class="lead">Enter your details and confirm your order.</p>
+      <div id="order-empty" class="empty" hidden>Your cart is empty. <a href="#products"
+          onclick="navigateTo('products')">Continue shopping</a></div>
+      <div class="order-page">
+        <section class="checkout-form">
+          <form id="order-form" novalidate>
+            <h2>Shipping & Contact</h2>
+            <label>Full name <input name="name" required></label>
+            <label>Email <input name="email" type="email" required></label>
+            <label>Phone <input name="phone" type="tel" required></label>
+            <label>Address line 1 <input name="address1" required></label>
+            <label>Address line 2 <input name="address2"></label>
+            <div class="form-row">
+              <label>City <input name="city" required></label>
+              <label>State <input name="state"></label>
+              <label>ZIP <input name="zip" required></label>
+              <label>Country
+                <select name="country" id="checkout-country" required>
+                  <!-- Populated by style.js -->
+                </select>
+              </label>
+            </div>
+            <div style="margin-top:12px">
+              <button id="place-order" class="add-btn" type="submit">Place Order</button>
+            </div>
+          </form>
+          <div id="order-confirm" class="order-confirm" hidden>
+            <h2>Thank you — order placed!</h2>
+            <p id="order-id"></p>
+            <p><a href="#products" onclick="navigateTo('products')">Continue shopping</a></p>
+          </div>
+        </section>
+
+        <aside class="order-summary">
+          <h2>Order summary</h2>
+          <div id="summary-items" class="cart-items"></div>
+          <div id="summary-box" class="cart-summary">
+            <div class="summary-row">
+              <div>Subtotal</div>
+              <div id="summary-sub">$0.00</div>
+            </div>
+            <div class="summary-row">
+              <div>Tax (10%)</div>
+              <div id="summary-tax">$0.00</div>
+            </div>
+            <div class="summary-row total">
+              <div>Total</div>
+              <div id="summary-total">$0.00</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Signup -->
+    <section data-section="signup" id="signup" style="display:none">
+      <div class="auth-wrap">
+        <aside class="auth-hero">
+          <h2>Welcome to MyShop</h2>
+          <p>Discover curated products, great deals and a smooth checkout — sign up to get personalized recommendations
+            and track orders.</p>
+        </aside>
+        <section class="auth-box">
+          <h1>Create account</h1>
+          <form id="signup-form" novalidate>
+            <div id="signup-msg" class="auth-msg"></div>
+            <label>Full name <input name="name" required></label>
+            <label>Email <input name="email" type="email" required></label>
+            <label>Password <input name="password" type="password" required></label>
+            <div class="actions">
+              <button class="add-btn" type="submit">Sign up</button>
+              <a class="muted" href="#login" onclick="navigateTo('login')">Already have an account? Log in</a>
+            </div>
+          </form>
+        </section>
+      </div>
+    </section>
+
+    <!-- Login -->
+    <section data-section="login" id="login" style="display:none">
+      <div class="auth-wrap">
+        <aside class="auth-hero">
+          <h2>Welcome back</h2>
+          <p>Sign in to continue shopping, view your orders and get personalized deals.</p>
+        </aside>
+        <section class="auth-box">
+          <h1>Log in</h1>
+          <form id="login-form" novalidate>
+            <div id="login-msg" class="auth-msg"></div>
+            <label>Email <input name="email" type="email" required></label>
+            <label>Password <input name="password" type="password" required></label>
+            <div class="actions">
+              <button class="add-btn" type="submit">Log in</button>
+              <a class="muted" href="#signup" onclick="navigateTo('signup')">Don't have an account? Sign up</a>
+            </div>
+          </form>
+        </section>
+      </div>
+    </section>
+
+    <!-- Orders -->
+    <section data-section="orders" id="orders" style="display:none">
+      <h1>Your Orders</h1>
+      <div id="orders-empty" class="empty" hidden>You haven't placed any orders yet.</div>
+      <div id="orders-list" class="orders-list"></div>
+    </section>
+
+    <!-- Profile -->
+    <section data-section="profile" id="profile" style="display:none">
+      <div class="profile-header">
+        <div id="profile-avatar" class="profile-avatar-large">?</div>
+        <div class="profile-info-main">
+          <h1 id="profile-name-display">Your Profile</h1>
+          <p id="profile-email-display" class="muted"></p>
+        </div>
+        <div class="profile-stats">
+          <div class="stat-card">
+            <span class="stat-value" id="profile-orders-count">0</span>
+            <span class="stat-label">Orders</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="profile-since">2025</span>
+            <span class="stat-label">Member Since</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <div class="profile-card">
+          <h2>Personal Information</h2>
+          <form id="profile-form" novalidate>
+            <div id="profile-msg" class="auth-msg"></div>
+            <div class="form-grid">
+              <label>Full name <input name="name" required placeholder="John Doe"></label>
+              <label>Email <input name="email" type="email" required placeholder="john@example.com"></label>
+              <label>Phone <input name="phone" type="tel" placeholder="+1 (555) 000-0000"></label>
+            </div>
+
+            <h3 style="margin-top:24px">Shipping Address</h3>
+            <div class="form-grid">
+              <label class="col-span-2">Address line 1 <input name="address1" placeholder="123 Street Name"></label>
+              <label class="col-span-2">Address line 2 <input name="address2" placeholder="Apt, Suite, Unit"></label>
+              <label>City <input name="city" placeholder="New York"></label>
+              <label>State/Province <input name="state" placeholder="NY"></label>
+              <label>ZIP / Postal <input name="zip" placeholder="10001"></label>
+              <label>Country
+                <select name="country" class="country-select" id="profile-country" required>
+                  <!-- Populated by JS -->
+                </select>
+              </label>
+            </div>
+
+            <div class="actions" style="margin-top:24px">
+              <button class="add-btn" type="submit">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="sp-footer">
+    <div class="container">© 2025 MyShop</div>
+  </footer>
+
+
+
+  <script src="style.js"></script>
+</body>
+
+</html>

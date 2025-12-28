@@ -1,0 +1,13 @@
+{
+    "name": "ecommerce-project",
+    "version": "1.0.0",
+    "description": "Root package for e-commerce project",
+    "scripts": {
+        "start": "node backend/server.js",
+        "backend-install": "npm install --prefix backend",
+        "dev": "npm run dev --prefix backend"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

@@ -1,0 +1,88 @@
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const path = require('path');
+const Product = require('./models/Product');
+const User = require('./models/User');
+const connectDB = require('./config/db');
+
+// Load environment variables
+dotenv.config();
+
+// Connect to database
+connectDB();
+
+// Sample products data (from data.json)
+const products = [
+    { id: 1, title: "tshirt", imageName: "tshirt", desc: "Soft cotton, everyday fit.", category: "Clothing", price: 24.99, discount: 20, image: "https://veirdo.in/cdn/shop/files/b_0119493a-9927-4550-8323-baefe5f625c0.jpg?v=1759917565" },
+    { id: 2, title: "shoes", imageName: "shoes", desc: "Lightweight with great grip.", category: "Footwear", price: 89.00, discount: 10, image: "https://www.campusshoes.com/cdn/shop/files/LEVEL_LEVEL_WHT-L.GRY_07_831c7a2c-ff1b-4011-9268-b11f984219c6.webp?v=1757580207" },
+    { id: 3, title: "wallet", imageName: "wallet", desc: "Slim profile, premium leather.", category: "Accessories", price: 49.50, discount: 0, image: "https://urbanforest.co.in/cdn/shop/files/A7402041.jpg?v=1733571068&width=823" },
+    { id: 4, title: "jacket", imageName: "jacket", desc: "Classic cut with reinforced seams.", category: "Clothing", price: 119.99, discount: 25, image: "https://www.instyle.com/thmb/gnZICghLoJtpP3AI0dzhXt3e9Kw=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/jackets-fad3552e9c974578b74ffce1768b7ba0.jpg" },
+    { id: 5, title: "totebag", imageName: "totebag", desc: "Carry everything with style.", category: "Accessories", price: 19.95, discount: 5, image: "https://i.etsystatic.com/23779612/r/il/d1a9e8/3322497813/il_570xN.3322497813_6hvq.jpg" },
+    { id: 6, title: "boots", imageName: "boots", desc: "Durable for outdoor adventures.", category: "Footwear", price: 149.99, discount: 30, image: "https://www.thealternate.in/cdn/shop/files/Black_matte_captain_boot_goodyear_welt_1.jpg?v=1724486113" },
+    { id: 7, title: "headphones", imageName: "headphones", desc: "Active noise cancellation and long battery.", category: "Electronics", price: 199.99, discount: 15, image: "https://www.designinfo.in/wp-content/uploads/2024/08/Sony-ULT-WEAR-Wireless-Noise-Canceling-Headphones-Black-2-485x485-optimized.webp" },
+    { id: 8, title: "sunglasses", imageName: "sunglasses", desc: "UV400 protection with a modern frame.", category: "Accessories", price: 69.00, discount: 10, image: "https://www.rkumar.in/cdn/shop/collections/Mens_Sunglasses.jpg?v=1740486754" },
+    { id: 9, title: "pants", imageName: "pants", desc: "Smart casual, stretch fabric.", category: "Clothing", price: 54.99, discount: 0, image: "https://i.pinimg.com/236x/fa/89/53/fa8953d7abf7db3642160686cc54d7b7.jpg" },
+    { id: 10, title: "sneakers", imageName: "sneakers", desc: "Comfort-first slip-on design.", category: "Footwear", price: 64.99, discount: 12, image: "https://assets.myntassets.com/w_412,q_30,dpr_3,fl_progressive,f_webp/assets/images/2024/JULY/29/6xDjrKNT_1c000df180b841b690cd7ac98984e554.jpg" }
+];
+
+// Sample users
+const users = [
+    {
+        name: 'Admin User',
+        email: 'admin@example.com',
+        password: 'admin123',
+        phone: '1234567890',
+        isAdmin: true,
+    },
+    {
+        name: 'Test User',
+        email: 'test@example.com',
+        password: 'test123',
+        phone: '0987654321',
+        isAdmin: false,
+    },
+];
+
+const importData = async () => {
+    try {
+        // Clear existing data
+        await Product.deleteMany();
+        await User.deleteMany();
+
+        console.log('Data Destroyed!');
+
+        // Insert products
+        await Product.insertMany(products);
+        console.log('Products Imported!');
+
+        // Insert users
+        await User.insertMany(users);
+        console.log('Users Imported!');
+
+        console.log('Data Import Success!');
+        process.exit();
+    } catch (error) {
+        console.error(`Error: ${error}`);
+        process.exit(1);
+    }
+};
+
+const destroyData = async () => {
+    try {
+        await Product.deleteMany();
+        await User.deleteMany();
+
+        console.log('Data Destroyed!');
+        process.exit();
+    } catch (error) {
+        console.error(`Error: ${error}`);
+        process.exit(1);
+    }
+};
+
+// Check command line arguments
+if (process.argv[2] === '-d') {
+    destroyData();
+} else {
+    importData();
+}
