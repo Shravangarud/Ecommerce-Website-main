@@ -4,7 +4,8 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 
 // Load environment variables from .env file
-dotenv.config();
+const path = require('path');
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Connect to MongoDB
 connectDB();
@@ -30,7 +31,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 
 // Serve static files from the root directory
-const path = require('path');
+// Serve static files from the root directory
 app.use(express.static(path.join(__dirname, '../')));
 
 // Root route - serve index.html

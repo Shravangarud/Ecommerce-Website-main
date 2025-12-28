@@ -1,5 +1,5 @@
 // Finalized JS for E-commerce Project (style.js)
-const API_URL = '/api';
+const API_URL = window.location.port === '5500' ? 'http://localhost:5000/api' : '/api';
 
 /* Utilities */
 const CURRENCIES = {
@@ -10,6 +10,8 @@ const CURRENCIES = {
 };
 
 let currentCurrency = localStorage.getItem('sp_currency') || 'INR';
+let currentPage = 1;
+let maxPages = 1;
 
 function formatCurrency(n) {
 	const cur = CURRENCIES[currentCurrency];
@@ -45,7 +47,19 @@ async function apiFetch(endpoint, options = {}) {
 
 	console.log(`[API] Fetching ${endpoint}...`);
 	const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
-	const data = await res.json();
+
+	const contentType = res.headers.get('content-type');
+	let data;
+
+	if (contentType && contentType.includes('application/json')) {
+		data = await res.json();
+	} else {
+		// If not JSON (likely an HTML error page usually), throw helpful error
+		const text = await res.text();
+		console.error(`[API ERROR] Non-JSON response from ${endpoint}:`, text);
+		throw new Error(`Server Error: ${res.status} ${res.statusText}`);
+	}
+
 	if (!res.ok) {
 		console.error(`[API ERROR] ${endpoint}:`, data.message);
 		throw new Error(data.message || 'Something went wrong');
@@ -141,6 +155,7 @@ function syncUI() {
 	if (section === 'order') loadOrderSummary();
 	if (section === 'orders') loadOrderHistory();
 	if (section === 'profile') loadProfile();
+	if (section === 'admin') loadAdminOrders();
 }
 
 function navigateTo(section, id = '') {
@@ -148,21 +163,35 @@ function navigateTo(section, id = '') {
 }
 
 /* Products */
-async function loadProducts(query = '', category = 'All') {
+async function loadProducts(query = '', category = 'All', page = 1) {
 	const grid = document.getElementById('sp-grid');
 	const catsEl = document.getElementById('sp-cats');
 	const emptyEl = document.getElementById('sp-empty');
+
+	// Sort
+	const sort = document.getElementById('sp-sort')?.value || 'newest';
+
 	if (!grid) return;
 
 	try {
-		let url = `/products?category=${category}`;
+		let url = `/products?category=${category}&page=${page}&sort=${sort}`;
 		if (query) url += `&search=${query}`;
-		const products = await apiFetch(url);
+		// Store current query state for pagination
+		grid.dataset.query = query;
+		grid.dataset.category = category;
 
-		// Render Categories if missing
+		const data = await apiFetch(url);
+
+		// Handle new response structure
+		const products = data.products || data;
+		currentPage = data.page || 1;
+		maxPages = data.pages || 1;
+
+		// Render Categories if missing (Only if we have products or first load)
 		if (catsEl.children.length === 0) {
-			// Fetch all unique categories from products (or fallback if none)
 			let categories = ['All'];
+			// Note: Ideally we'd have a separate endpoint for categories, but here we infer from current batch
+			// which is imperfect with pagination but acceptable for MVP.
 			if (products.length > 0) {
 				const fromProducts = [...new Set(products.map(p => p.category))].filter(Boolean);
 				categories = ['All', ...fromProducts];
@@ -176,7 +205,7 @@ async function loadProducts(query = '', category = 'All') {
 				btn.onclick = () => {
 					document.querySelectorAll('.cat').forEach(b => b.classList.remove('active'));
 					btn.classList.add('active');
-					loadProducts(document.getElementById('sp-search')?.value, c);
+					loadProducts(document.getElementById('sp-search')?.value, c, 1);
 				};
 				catsEl.appendChild(btn);
 			});
@@ -185,6 +214,7 @@ async function loadProducts(query = '', category = 'All') {
 		grid.innerHTML = '';
 		if (products.length === 0) {
 			emptyEl.hidden = false;
+			updatePaginationControls();
 			return;
 		}
 		emptyEl.hidden = true;
@@ -212,9 +242,32 @@ async function loadProducts(query = '', category = 'All') {
             `;
 			grid.appendChild(card);
 		});
+
+		updatePaginationControls();
+
 	} catch (err) {
 		console.error(err);
 	}
+}
+
+function updatePaginationControls() {
+	const prevBtn = document.getElementById('prev-page');
+	const nextBtn = document.getElementById('next-page');
+	const info = document.getElementById('page-info');
+	const pagDiv = document.getElementById('sp-pagination');
+
+	if (!pagDiv) return;
+
+	// Hide if only 1 page
+	if (maxPages <= 1) {
+		pagDiv.hidden = true;
+		return;
+	}
+	pagDiv.hidden = false;
+
+	if (info) info.textContent = `Page ${currentPage} of ${maxPages}`;
+	if (prevBtn) prevBtn.disabled = currentPage <= 1;
+	if (nextBtn) nextBtn.disabled = currentPage >= maxPages;
 }
 
 async function loadProductDetail(id) {
@@ -523,6 +576,69 @@ async function handleProfileUpdate(e) {
 	}
 }
 
+/* Admin Dashboard */
+async function loadAdminOrders() {
+	const list = document.getElementById('admin-orders-list');
+	if (!list) return;
+
+	try {
+		showLoading(true);
+		// Note: Reusing /api/orders endpoint - in real app, might want specific admin endpoint or params
+		// Assuming Admin can see all orders or the same endpoint returns relevant data.
+		const orders = await apiFetch('/orders');
+
+		list.innerHTML = '';
+		let revenue = 0;
+
+		orders.forEach(o => {
+			revenue += o.total;
+			list.innerHTML += `
+               <div class="order-card admin-card">
+                    <div class="order-header">
+                        <span class="order-id">#${o._id.slice(-8).toUpperCase()}</span>
+                        <div class="admin-actions">
+                            <select onchange="updateOrderStatus('${o._id}', this.value)" class="status-select">
+                                <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="order-details">
+                         <div>User: ${o.user || 'N/A'}</div>
+                         <div>Date: ${new Date(o.createdAt).toLocaleDateString()}</div>
+                         <div style="font-weight:700">Total: ${formatCurrency(o.total)}</div>
+                    </div>
+               </div>
+            `;
+		});
+
+		document.getElementById('admin-total-orders').textContent = orders.length;
+		document.getElementById('admin-total-revenue').textContent = formatCurrency(revenue);
+
+	} catch (err) {
+		showMsg('admin-orders-list', 'Failed to load orders: ' + err.message);
+	} finally {
+		showLoading(false);
+	}
+}
+
+async function updateOrderStatus(id, status) {
+	try {
+		showLoading(true);
+		await apiFetch(`/orders/${id}/status`, {
+			method: 'PUT',
+			body: JSON.stringify({ status })
+		});
+		showMsg('admin-orders-list', 'Status updated!', 'success');
+	} catch (err) {
+		alert(err.message);
+	} finally {
+		showLoading(false);
+	}
+}
+
 /* Auth UI */
 function renderAuthLinks() {
 	const el = document.getElementById('auth-links');
@@ -531,10 +647,12 @@ function renderAuthLinks() {
 
 	if (user) {
 		const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+		const adminLink = user.isAdmin ? `<a href="#admin" onclick="navigateTo('admin')">Admin Board</a>` : '';
 		el.innerHTML = `
             <div style="position:relative">
                 <button class="avatar" onclick="toggleDropdown(event)">${initials}</button>
                 <div id="user-dropdown" class="account-dropdown" style="display:none">
+                    ${adminLink}
                     <a href="#profile" onclick="navigateTo('profile')">Profile</a>
                     <a href="#orders" onclick="navigateTo('orders')">Orders</a>
                     <button onclick="logout()">Logout</button>
@@ -622,10 +740,19 @@ document.addEventListener('DOMContentLoaded', () => {
 	window.addEventListener('hashchange', syncUI);
 	syncUI();
 
-	// Global click to close dropdowns
-	window.addEventListener('click', () => {
-		const dd = document.getElementById('user-dropdown');
-		if (dd) dd.style.display = 'none';
+	// Pagination Listeners
+	document.getElementById('prev-page')?.addEventListener('click', () => {
+		if (currentPage > 1) {
+			const grid = document.getElementById('sp-grid');
+			loadProducts(grid.dataset.query, grid.dataset.category, currentPage - 1);
+		}
+	});
+
+	document.getElementById('next-page')?.addEventListener('click', () => {
+		if (currentPage < maxPages) {
+			const grid = document.getElementById('sp-grid');
+			loadProducts(grid.dataset.query, grid.dataset.category, currentPage + 1);
+		}
 	});
 });
 

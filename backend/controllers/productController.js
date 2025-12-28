@@ -7,7 +7,7 @@ const Product = require('../models/Product');
  * @access  Public
  */
 const getProducts = asyncHandler(async (req, res) => {
-    const { category, search } = req.query;
+    const { category, search, sort, page = 1, limit = 8 } = req.query;
 
     let query = {};
 
@@ -25,8 +25,29 @@ const getProducts = asyncHandler(async (req, res) => {
         ];
     }
 
-    const products = await Product.find(query);
-    res.json(products);
+    // Sorting
+    let sortOption = {};
+    if (sort === 'price_asc') sortOption.price = 1;
+    if (sort === 'price_desc') sortOption.price = -1;
+    if (sort === 'newest') sortOption.createdAt = -1;
+
+    // Pagination
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const total = await Product.countDocuments(query);
+    const products = await Product.find(query)
+        .sort(sortOption)
+        .skip(skip)
+        .limit(limitNum);
+
+    res.json({
+        products,
+        page: pageNum,
+        pages: Math.ceil(total / limitNum),
+        total,
+    });
 });
 
 /**

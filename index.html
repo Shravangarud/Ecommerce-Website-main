@@ -77,10 +77,22 @@
       <p class="lead">Filter by category and see product cards with pricing & discounts.</p>
       <div class="sp-categories" aria-label="Categories">
         <div id="sp-cats" class="cat-list"></div>
+        <div class="sort-wrap" style="margin-top:10px">
+          <select id="sp-sort" class="sort-select" onchange="loadProducts()">
+            <option value="newest">Newest First</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+          </select>
+        </div>
       </div>
       <div class="sp-products" aria-live="polite">
         <div id="sp-grid" class="grid"></div>
         <div id="sp-empty" class="empty" hidden>No products found.</div>
+        <div id="sp-pagination" class="pagination" hidden>
+          <button id="prev-page" disabled>Previous</button>
+          <span id="page-info">Page 1 of 1</span>
+          <button id="next-page" disabled>Next</button>
+        </div>
       </div>
     </section>
 
@@ -226,6 +238,25 @@
       <h1>Your Orders</h1>
       <div id="orders-empty" class="empty" hidden>You haven't placed any orders yet.</div>
       <div id="orders-list" class="orders-list"></div>
+    </section>
+
+    <!-- Admin Dashboard -->
+    <section data-section="admin" id="admin" style="display:none">
+      <div class="section-header">
+        <h1>Admin Dashboard</h1>
+        <button class="add-btn micro" onclick="loadAdminOrders()">Refresh</button>
+      </div>
+      <div class="admin-stats">
+        <div class="stat-card">
+          <span class="stat-value" id="admin-total-orders">0</span>
+          <span class="stat-label">Total Orders</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="admin-total-revenue">$0.00</span>
+          <span class="stat-label">Revenue</span>
+        </div>
+      </div>
+      <div id="admin-orders-list" class="orders-list admin-list"></div>
     </section>
 
     <!-- Profile -->

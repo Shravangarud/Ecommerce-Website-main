@@ -62,7 +62,14 @@ const createOrder = asyncHandler(async (req, res) => {
  * @access  Private
  */
 const getOrders = asyncHandler(async (req, res) => {
-    const orders = await Order.find({ user: req.user._id })
+    let query = { user: req.user._id };
+
+    // If admin, show all orders
+    if (req.user.isAdmin) {
+        query = {};
+    }
+
+    const orders = await Order.find(query)
         .sort({ createdAt: -1 })
         .populate('items.product');
 
