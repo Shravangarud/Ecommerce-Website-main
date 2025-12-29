@@ -18,6 +18,41 @@ const connectDB = async () => {
     });
 
     console.log(`MongoDB Connected (Real): ${conn.connection.host}`);
+
+    // Auto-seed if running in production and database is empty
+    const Product = require('../models/Product');
+    const User = require('../models/User');
+    const count = await Product.countDocuments();
+
+    if (count === 0 && process.env.NODE_ENV === 'production') {
+      console.log('[INFO] Production Database is empty. Auto-seeding...');
+
+      // Hardcoded seed data (subset for safety) to ensure site is not empty
+      const seedProducts = [
+        { title: "Urban Nomad Oversized Tee", desc: "Heavyweight organic cotton tee in charcoal grey.", category: "Clothing", price: 1299, discount: 15, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80" },
+        { title: "Legacy Selvedge Denim Jacket", desc: "Raw indigo denim with reinforced triple-stitch details.", category: "Clothing", price: 4499, discount: 20, image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80" },
+        { title: "Elite Stretch-Fit Chinos", desc: "Premium cotton-blend chinos for all-day versatility.", category: "Clothing", price: 2899, discount: 10, image: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=800&q=80" },
+        { title: "Apex Speed-Light Runners", desc: "Ultra-breathable mesh sneakers with reactive foam cushioning.", category: "Footwear", price: 5499, discount: 12, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80" },
+        { title: "Heritage Leather Chelsea Boots", desc: "Full-grain Italian leather with flexible elastic side panels.", category: "Footwear", price: 7999, discount: 0, image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80" },
+        { title: "Aura Pro Wireless ANC Headphones", desc: "Studio-grade noise cancellation with 40-hour high-fidelity playback.", category: "Electronics", price: 18999, discount: 15, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80" },
+        { title: "TitanView 4K Ultra Action Cam", desc: "Dual-screen 60FPS stabilized footage for extreme perspectives.", category: "Electronics", price: 14000, discount: 12, image: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=800&q=80" }
+      ];
+
+      await Product.insertMany(seedProducts);
+      console.log(`[INFO] Seeded ${seedProducts.length} products to Production DB.`);
+
+      const userCount = await User.countDocuments();
+      if (userCount === 0) {
+        await User.create({
+          name: 'Demo Admin',
+          email: 'admin@example.com',
+          password: 'password123',
+          phone: '0000000000',
+          isAdmin: true
+        });
+        console.log('[INFO] Seeded admin user (admin@example.com / password123)');
+      }
+    }
   } catch (error) {
     console.warn(`[WARNING] Failed to connect to Real MongoDB: ${error.message}`);
 
