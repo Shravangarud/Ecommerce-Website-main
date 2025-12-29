@@ -49,6 +49,14 @@
           <a href="#login" onclick="navigateTo('login')">Log in</a>
           <a href="#signup" onclick="navigateTo('signup')" style="margin-left:10px">Sign up</a>
         </div>
+        <button class="cart-btn" aria-label="Wishlist" onclick="navigateTo('wishlist')" style="margin-right:8px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+            </path>
+          </svg>
+        </button>
         <button class="cart-btn" aria-label="View cart" onclick="navigateTo('cart')">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true">
@@ -128,6 +136,13 @@
           <button id="checkout" class="add-btn" type="button" onclick="navigateTo('order')">Proceed to Checkout</button>
         </div>
       </div>
+    </section>
+
+    <!-- Wishlist -->
+    <section data-section="wishlist" id="wishlist" style="display:none">
+      <h1>My Wishlist</h1>
+      <div id="wishlist-empty" class="empty" hidden>Your wishlist is empty.</div>
+      <div id="wishlist-grid" class="grid"></div>
     </section>
 
     <!-- Order -->
@@ -244,19 +259,69 @@
     <section data-section="admin" id="admin" style="display:none">
       <div class="section-header">
         <h1>Admin Dashboard</h1>
-        <button class="add-btn micro" onclick="loadAdminOrders()">Refresh</button>
-      </div>
-      <div class="admin-stats">
-        <div class="stat-card">
-          <span class="stat-value" id="admin-total-orders">0</span>
-          <span class="stat-label">Total Orders</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value" id="admin-total-revenue">$0.00</span>
-          <span class="stat-label">Revenue</span>
+        <div class="admin-tabs">
+          <button class="add-btn micro active" id="tab-orders-btn" onclick="switchAdminTab('orders')">Orders</button>
+          <button class="add-btn micro outline" id="tab-products-btn"
+            onclick="switchAdminTab('products')">Products</button>
         </div>
       </div>
-      <div id="admin-orders-list" class="orders-list admin-list"></div>
+
+      <!-- Orders Tab -->
+      <div id="admin-tab-orders">
+        <div class="admin-stats">
+          <div class="stat-card">
+            <span class="stat-value" id="admin-total-orders">0</span>
+            <span class="stat-label">Total Orders</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="admin-total-revenue">$0.00</span>
+            <span class="stat-label">Revenue</span>
+          </div>
+        </div>
+        <div class="section-actions" style="margin: 20px 0; display:flex; justify-content:flex-end">
+          <button class="add-btn micro" onclick="loadAdminOrders()">Refresh Orders</button>
+        </div>
+        <div id="admin-orders-list" class="orders-list admin-list"></div>
+      </div>
+
+      <!-- Products Tab -->
+      <div id="admin-tab-products" style="display:none">
+        <div class="section-actions"
+          style="margin: 20px 0; display:flex; justify-content:space-between; align-items:center">
+          <h2>Product Inventory</h2>
+          <button class="add-btn" onclick="openProductModal()">+ Add New Product</button>
+        </div>
+        <div id="admin-products-list" class="admin-products-list"></div>
+      </div>
+
+      <!-- Product Modal -->
+      <div id="product-modal" class="modal-overlay" style="display:none">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 id="modal-title">Add New Product</h2>
+            <button class="close-btn" onclick="closeProductModal()">×</button>
+          </div>
+          <form id="product-form">
+            <input type="hidden" name="id">
+            <label>Title <input name="title" required placeholder="Product Name"></label>
+            <label>Description <textarea name="desc" required rows="3" placeholder="Description"></textarea></label>
+            <div class="form-row">
+              <label>Price <input name="price" type="number" required min="0"></label>
+              <label>Discount % <input name="discount" type="number" min="0" max="99" value="0"></label>
+            </div>
+            <div class="form-row">
+              <label>Category <input name="category" required placeholder="e.g. Clothing"></label>
+              <label>Stock <input name="stock" type="number" required value="100"></label>
+            </div>
+            <label>Image URL <input name="image" required placeholder="https://..."></label>
+
+            <div class="modal-actions">
+              <button type="button" class="buy-btn" onclick="closeProductModal()">Cancel</button>
+              <button type="submit" class="add-btn">Save Product</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </section>
 
     <!-- Profile -->

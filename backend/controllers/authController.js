@@ -131,9 +131,69 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     }
 });
 
+/**
+ * @desc    Get user wishlist
+ * @route   GET /api/auth/wishlist
+ * @access  Private
+ */
+const getWishlist = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).populate('wishlist');
+    if (user) {
+        res.json(user.wishlist);
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
+/**
+ * @desc    Add to wishlist
+ * @route   POST /api/auth/wishlist/:id
+ * @access  Private
+ */
+const addToWishlist = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    const productId = req.params.id;
+
+    if (user) {
+        if (!user.wishlist.includes(productId)) {
+            user.wishlist.push(productId);
+            await user.save();
+        }
+        res.json({ message: 'Product added to wishlist' });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
+/**
+ * @desc    Remove from wishlist
+ * @route   DELETE /api/auth/wishlist/:id
+ * @access  Private
+ */
+const removeFromWishlist = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    const productId = req.params.id;
+
+    if (user) {
+        user.wishlist = user.wishlist.filter(
+            (id) => id.toString() !== productId.toString()
+        );
+        await user.save();
+        res.json({ message: 'Product removed from wishlist' });
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
 module.exports = {
     registerUser,
     loginUser,
     getUserProfile,
     updateUserProfile,
+    getWishlist,
+    addToWishlist,
+    removeFromWishlist
 };
