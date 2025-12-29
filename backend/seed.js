@@ -94,7 +94,10 @@ const importData = async () => {
         console.log('Products Imported!');
 
         // Insert users
-        await User.insertMany(users);
+        // Insert users
+        for (const user of users) {
+            await User.create(user);
+        }
         console.log('Users Imported!');
 
         console.log('Data Import Success!');

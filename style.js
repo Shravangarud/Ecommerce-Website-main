@@ -1,5 +1,7 @@
 // Finalized JS for E-commerce Project (style.js)
-const API_URL = window.location.port === '5500' ? 'http://localhost:5000/api' : '/api';
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '5000'
+	? 'http://localhost:5000/api'
+	: '/api';
 
 /* Utilities */
 const CURRENCIES = {
@@ -246,7 +248,17 @@ async function loadProducts(query = '', category = 'All', page = 1) {
 		updatePaginationControls();
 
 	} catch (err) {
-		console.error(err);
+		console.error("Failed to load products:", err);
+		if (emptyEl) {
+			emptyEl.hidden = false;
+			emptyEl.innerHTML = `
+                <div style="text-align:center; padding: 20px;">
+                    <p style="color: #ef4444; margin-bottom: 10px;">Unable to load products.</p>
+                    <p style="font-size: 0.9em; color: #64748b;">Please ensure the backend server is running on port 5000.</p>
+                    <p style="font-size: 0.8em; color: #94a3b8; margin-top:5px;">Error: ${err.message}</p>
+                </div>
+            `;
+		}
 	}
 }
 
