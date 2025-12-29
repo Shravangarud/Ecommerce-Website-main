@@ -182,11 +182,6 @@ async function loadProducts(query = '', category = 'All', page = 1) {
 	if (!grid) return;
 
 	try {
-		// DEBUG: Temporary Alert to diagnose Issue
-		/*
-		alert(`Requesting: ${API_URL}/products?category=${category}&page=${page}`);
-		*/
-
 		let url = `/products?category=${category}&page=${page}&sort=${sort}`;
 		if (query) url += `&search=${query}`;
 		// Store current query state for pagination
@@ -194,11 +189,6 @@ async function loadProducts(query = '', category = 'All', page = 1) {
 		grid.dataset.category = category;
 
 		const data = await apiFetch(url);
-
-		// DEBUG
-		/*
-		alert(`Data Rx: ${JSON.stringify(data).slice(0, 100)}`);
-		*/
 
 		// Handle new response structure
 		const products = data.products || data;
@@ -214,9 +204,6 @@ async function loadProducts(query = '', category = 'All', page = 1) {
 				const fromProducts = [...new Set(products.map(p => p.category))].filter(Boolean);
 				categories = ['All', ...fromProducts];
 			}
-
-			// DEBUG
-			// console.log("Categories:", categories);
 
 			catsEl.innerHTML = '';
 			categories.forEach(c => {
@@ -268,8 +255,6 @@ async function loadProducts(query = '', category = 'All', page = 1) {
 
 	} catch (err) {
 		console.error("Failed to load products:", err);
-		// Alert on error for live debugging
-		alert(`Error loading products: ${err.message}`);
 		if (emptyEl) {
 			emptyEl.hidden = false;
 			emptyEl.innerHTML = `
