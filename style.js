@@ -1,7 +1,13 @@
 // Finalized JS for E-commerce Project (style.js)
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '5000'
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const isFile = window.location.protocol === 'file:';
+
+// Logic: 
+// 1. If 'file://' or 'localhost' (but NOT port 5000), assume Dev Mode -> Point to http://localhost:5000/api
+// 2. Otherwise (Production or running node server on port 5000) -> Use relative path '/api'
+const API_URL = (isLocalhost && window.location.port !== '5000') || isFile
 	? 'http://localhost:5000/api'
-	: (window.location.protocol === 'file:' ? 'http://localhost:5000/api' : '/api');
+	: '/api';
 
 /* Utilities */
 const CURRENCIES = {
