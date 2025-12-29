@@ -1,7 +1,7 @@
 // Finalized JS for E-commerce Project (style.js)
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '5000'
 	? 'http://localhost:5000/api'
-	: '/api';
+	: (window.location.protocol === 'file:' ? 'http://localhost:5000/api' : '/api');
 
 /* Utilities */
 const CURRENCIES = {
