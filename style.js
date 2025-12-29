@@ -182,6 +182,11 @@ async function loadProducts(query = '', category = 'All', page = 1) {
 	if (!grid) return;
 
 	try {
+		// DEBUG: Temporary Alert to diagnose Issue
+		/*
+		alert(`Requesting: ${API_URL}/products?category=${category}&page=${page}`);
+		*/
+
 		let url = `/products?category=${category}&page=${page}&sort=${sort}`;
 		if (query) url += `&search=${query}`;
 		// Store current query state for pagination
@@ -189,6 +194,11 @@ async function loadProducts(query = '', category = 'All', page = 1) {
 		grid.dataset.category = category;
 
 		const data = await apiFetch(url);
+
+		// DEBUG
+		/*
+		alert(`Data Rx: ${JSON.stringify(data).slice(0, 100)}`);
+		*/
 
 		// Handle new response structure
 		const products = data.products || data;
@@ -204,6 +214,9 @@ async function loadProducts(query = '', category = 'All', page = 1) {
 				const fromProducts = [...new Set(products.map(p => p.category))].filter(Boolean);
 				categories = ['All', ...fromProducts];
 			}
+
+			// DEBUG
+			// console.log("Categories:", categories);
 
 			catsEl.innerHTML = '';
 			categories.forEach(c => {
@@ -233,7 +246,7 @@ async function loadProducts(query = '', category = 'All', page = 1) {
 			card.className = 'card';
 			card.innerHTML = `
                 <div class="media" onclick="navigateTo('product-detail', '${p._id}')" style="cursor:pointer">
-                    <img src="${p.image}" alt="${p.title}" onerror="this.src='https://images.unsplash.com/photo-1560393464-5c69a73c5770?auto=format&fit=crop&w=400&q=80'">
+                    <img src="${p.image}" alt="${p.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1560393464-5c69a73c5770?auto=format&fit=crop&w=400&q=80'">
                 </div>
                 <div class="body">
                     <h3 class="title" onclick="navigateTo('product-detail', '${p._id}')" style="cursor:pointer">${p.title}</h3>
@@ -255,13 +268,15 @@ async function loadProducts(query = '', category = 'All', page = 1) {
 
 	} catch (err) {
 		console.error("Failed to load products:", err);
+		// Alert on error for live debugging
+		alert(`Error loading products: ${err.message}`);
 		if (emptyEl) {
 			emptyEl.hidden = false;
 			emptyEl.innerHTML = `
                 <div style="text-align:center; padding: 20px;">
                     <p style="color: #ef4444; margin-bottom: 10px;">Unable to load products.</p>
-                    <p style="font-size: 0.9em; color: #64748b;">Please ensure the backend server is running on port 5000.</p>
-                    <p style="font-size: 0.8em; color: #94a3b8; margin-top:5px;">Error: ${err.message}</p>
+                    <p style="font-size: 0.9em; color: #64748b;">Server responded with error.</p>
+                    <p style="font-size: 0.8em; color: #94a3b8; margin-top:5px;">${err.message}</p>
                 </div>
             `;
 		}
