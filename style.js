@@ -70,6 +70,18 @@ async function apiFetch(endpoint, options = {}) {
 
 	if (!res.ok) {
 		console.error(`[API ERROR] ${endpoint}:`, data.message);
+
+		// Auto-logout on token failure
+		if (res.status === 401 || data.message === "Not authorized, token failed") {
+			localStorage.removeItem('sp_current_user');
+			localStorage.removeItem('sp_token');
+			// Avoid infinite loop if already on login
+			if (!window.location.hash.includes('login')) {
+				window.location.hash = 'login';
+				window.location.reload();
+			}
+		}
+
 		throw new Error(data.message || 'Something went wrong');
 	}
 	return data;
